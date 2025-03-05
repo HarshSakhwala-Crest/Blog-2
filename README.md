@@ -137,9 +137,7 @@ python [NAME_OF_FILE].py
 ```
 
 ## OUTPUT
-```bash
-![tmpw_f7dami.PNG](attachment:tmpw_f7dami.PNG)
-```
+https://github.com/HarshSakhwala-Crest/Blog-2/blob/133c1026245b048fc4a57358c717cf8d3e1cdda9/Blog%202.ipynb
 
 
 # Evaluating and Testing Images using Console
