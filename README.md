@@ -25,9 +25,10 @@ Sign in to the AWS Management Console as an IAM administrator or appropriate IAM
 Create a Stack to deploy the YAML file that contains contains the infrastructure, including AWS Identity and Access Management (IAM)  users, policies, API methods, the S3 bucket, and the Lambda function code. provided in the CloudFormation template.
 
 # Steps to Create a Stack
-Create a S3 Bucket that will hold the provided YML file.
+First remove the ReservedConcurrentExecutions line in all of it's two occurance in the provided YML file in Launch Stack.
+Then Create a S3 Bucket that will hold this YML file.
 
-Choose Create Stack in CloudFormation.
+Choose Create Stack in CloudFormation to create a new stack.
 
 provide the S3 object url of the YML file and choose next.
 
