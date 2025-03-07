@@ -162,3 +162,267 @@ Choose Test.
 
 ## OUTPUT
 ![alt text](image_2025_03_05T07_07_20_670Z.png)
+
+
+# Blog-2 - Additional 1 - Generating Images using Amazon Nova Canvas
+
+## Code
+
+```python
+import boto3
+import json
+import base64
+import io
+Import uuid
+from PIL import Image
+
+# Set up the Amazon Bedrock client
+bedrock_client = boto3.client(
+    service_name="bedrock-runtime",
+    region_name="us-east-1"
+)
+
+# Define the model ID
+model_id = "amazon.nova-canvas-v1:0"
+
+# Prepare the input prompt
+prompt = "a black cat in an alleyway with blue eyes."
+
+# Create the request payload
+body = json.dumps({
+        "taskType": "TEXT_IMAGE",
+        "textToImageParams": {
+            "text": prompt
+        },
+        "imageGenerationConfig": {
+            "numberOfImages": 1,
+            "height": 1024,
+            "width": 1024,
+            "cfgScale": 8.0,
+            "seed": 0
+        }
+    })
+
+accept = "application/json"
+content_type = "application/json"
+
+# Invoke the Amazon Bedrock model
+response = bedrock_client.invoke_model(
+    modelId=model_id,
+    body=body,
+    accept=accept, 
+    contentType=content_type
+)
+
+# Process the response
+result = json.loads(response["body"].read())
+
+base64_image = result.get("images")[0]
+base64_bytes = base64_image.encode('ascii')
+image_bytes = base64.b64decode(base64_bytes)
+
+image = Image.open(io.BytesIO(image_bytes))
+image.show()
+unique_id = uuid.uuid4()
+image.save(f"D:\Data-AI Blogs\Blog-2\generated-images\{unique_id}.png")
+
+print(f"Generated Image is Stored Successfully at : D:\Data-AI\Blogs\Blog-2\generated-images\{unique_id}.png")
+```
+
+## OUTPUT
+
+Generated Image is Stored Successfully at : D:\Data-AI Blogs\Blog-2\generated-images\e4e392df-27a1-4fe2-a714-8ba9a68566b4.png
+
+
+# Blog-2 - Additional 2 - Storing the Generated Images in Amazon S3 Bucket
+
+## Code
+
+```python
+import boto3
+import json
+import base64
+import io
+import uuid
+from PIL import Image
+
+# Set up the Amazon Bedrock client
+bedrock_client = boto3.client(
+    service_name="bedrock-runtime",
+    region_name="us-east-1"
+)
+
+# Define the model ID
+model_id = "amazon.nova-canvas-v1:0"
+
+# Prepare the input prompt
+prompt = "create me an image of indian flag which should be held by cricketer ms dhoni in indian cricket team jersey on the moon"
+
+# Create the request payload
+body = json.dumps({
+        "taskType": "TEXT_IMAGE",
+        "textToImageParams": {
+            "text": prompt
+        },
+        "imageGenerationConfig": {
+            "numberOfImages": 1,
+            "height": 1024,
+            "width": 1024,
+            "cfgScale": 8.0,
+            "seed": 0
+        }
+    })
+
+accept = "application/json"
+content_type = "application/json"
+
+# Invoke the Amazon Bedrock model
+response = bedrock_client.invoke_model(
+    modelId=model_id,
+    body=body,
+    accept=accept, 
+    contentType=content_type
+)
+
+# Process the response
+result = json.loads(response["body"].read())
+
+base64_image = result.get("images")[0]
+base64_bytes = base64_image.encode('ascii')
+image_bytes = base64.b64decode(base64_bytes)
+
+image = Image.open(io.BytesIO(image_bytes))
+image.show()
+
+s3 = boto3.client("s3")
+id = uuid.uuid4()
+
+bucket_name = "blog-2-bucket-for-image-storage"
+object_path = f"generated-images/{id}.png"
+
+response = s3.put_object(
+            Bucket=bucket_name,
+            Key=object_path,
+            Body=image_bytes,
+            ContentType='image/jpeg'
+        )
+
+object_url = f"https://{bucket_name}.s3.us-east-1.amazonaws.com/{object_path}"
+print(f"Generated Image is Stored Successfully at S3 location : {object_url}")
+```
+
+## OUTPUT
+
+Generated Image is Stored Successfully at S3 location : https://blog-2-bucket-for-image-storage.s3.us-east-1.amazonaws.com/generated-images/aca33f19-c5e3-464a-8e95-08093960887b.png
+
+
+# Blog-2 - Additional 3 - Modifying Generated Images using Amazon Titan Image Generator
+
+## Code
+
+```python
+import boto3
+import json
+import base64
+import io
+import os
+from PIL import Image
+import uuid
+
+# Initialize Amazon Bedrock client
+bedrock_client = boto3.client("bedrock-runtime", region_name="us-east-1")
+
+# Define the model ID
+model_id = "amazon.titan-image-generator-v2:0"
+
+# Step 1: Generate Initial Image
+# Prepare the input prompt
+initial_prompt = "Create me an image of a cricket player with bat in one hand which is held on the shoulder and helmet in another hand and the player should have wear blue jersey with team logo of mumbai indians"
+
+# Create the request payload
+payload = {
+    "taskType": "TEXT_IMAGE",
+    "textToImageParams": {"text": initial_prompt},
+    "imageGenerationConfig": {
+        "numberOfImages": 1,
+        "height": 1024,
+        "width": 1024,
+        "cfgScale": 8.0,
+        "seed": 0
+    }
+}
+
+# Invoke the Amazon Titan Image Generator v2 model
+response = bedrock_client.invoke_model(
+    modelId=model_id,
+    body=json.dumps(payload),
+    accept="application/json",
+    contentType="application/json"
+)
+
+# Process the response
+result = json.loads(response["body"].read())
+
+base64_image = result.get("images")[0]
+base64_bytes = base64_image.encode('ascii')
+image_bytes = base64.b64decode(base64_image)
+
+initial_image = Image.open(io.BytesIO(image_bytes))
+initial_image.show()
+
+unique_id = uuid.uuid4()
+os.mkdir(f"generated-and-modified-images/{unique_id}")
+
+initial_image_path = f"generated-and-modified-images/{unique_id}/generated_image.png"
+initial_image.save(initial_image_path)
+print(f"Generated image saved at: {initial_image_path}")
+
+# Step 2: Modifying the Generated Image (with an updated prompt)
+modified_prompt = "Change the player's complete jersey color to yellow and team logo name to chennai super kings in the previously generated image."
+
+with open(f"D:\Data-AI Blogs\Blog-2\generated-and-modified-images\{unique_id}\generated_image.png","rb") as image_file:
+    base64_image = base64.b64encode(image_file.read()).decode("utf-8")
+
+# Update Payload for Image Updation
+payload = {
+     "taskType": "IMAGE_VARIATION",
+     "imageVariationParams": {
+         "text": modified_prompt,
+         "images": [base64_image],
+         "similarityStrength": 1.0,  # Range: 0.2 to 1.0
+     },
+     "imageGenerationConfig": {
+         "quality": "premium",
+         "numberOfImages": 1,
+         "height": 1024,
+         "width": 1024,
+         "cfgScale": 8.0
+     }
+}
+
+response = bedrock_client.invoke_model(
+    modelId=model_id,
+    body=json.dumps(payload),
+    accept="application/json",
+    contentType="application/json"
+)
+
+result = json.loads(response["body"].read())
+
+base64_modified_image = result.get("images")[0]
+base64_bytes = base64_image.encode('ascii')
+modified_image_bytes = base64.b64decode(base64_modified_image)
+
+# Save and display the modified image
+modified_image = Image.open(io.BytesIO(modified_image_bytes))
+modified_image.show()
+
+modified_image_path = f"generated-and-modified-images/{unique_id}/modified_image.png"
+modified_image.save(modified_image_path)
+print(f"Modified image saved at: {modified_image_path}")
+```
+
+## Output
+
+Generated image saved at: generated-and-modified-images/6ba0e04c-def5-4efb-a710-83b35d2231f2/generated_image.png
+Modified image saved at: generated-and-modified-images/6ba0e04c-def5-4efb-a710-83b35d2231f2/modified_image.png
