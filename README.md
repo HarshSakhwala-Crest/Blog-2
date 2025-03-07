@@ -44,9 +44,31 @@ Acknowledge the creation of IAM resources and choose Submit.
 
 When the stack status is CREATE_COMPLETE, navigate to the Outputs tab and find the API information. Copy the ApiId, the ApiUrl and ResourceId to a safe place and continue to test.
 
+![image_2025_03_05T07_07_20_658Z](https://github.com/user-attachments/assets/8ccc5bb3-9665-470a-99bf-ba64fd9aea85)
 
-# Generating Images using Amazon Nova Canvas
+# Evaluating and Testing Images using Console
 
+## Steps
+On the API Gateway console, choose APIs in the navigation pane.
+
+On the APIs list, choose BedrockImageGenEval.
+
+In the Resources section, select the POST method below /generate-image.
+
+Choose the Test tab in the method execution settings.
+
+In the Request body section, enter the following JSON structure:
+{ “prompt”:”your prompt” }
+
+Choose Test.
+
+![image_2025_03_05T07_07_20_668Z](https://github.com/user-attachments/assets/4b109ac7-0135-48b6-8d8c-dd55ecf19b38)
+
+## OUTPUT
+![image_2025_03_05T07_07_20_670Z](https://github.com/user-attachments/assets/8ced6c69-38a5-4e83-b32b-a039c9435816)
+
+
+# Blog-2 - Additional 1 - Generating Images using Amazon Nova Canvas
 ## Create a python file
 create  python file named main.py or any other name
 
@@ -71,100 +93,6 @@ Installing boto3 on our virtual environment
 ```bash
 pip install boto3
 ```
-
-## Code
-
-```python
-import boto3
-import json
-import base64
-import io
-from PIL import Image
-
-# Set up the Amazon Bedrock client
-bedrock_client = boto3.client(
-    service_name="bedrock-runtime",
-    region_name="us-east-1"
-)
-
-# Define the model ID
-model_id = "amazon.nova-canvas-v1:0"
-
-# Prepare the input prompt
-prompt = "a black cat in an alleyway with blue eyes."
-
-# Create the request payload
-body = json.dumps({
-        "taskType": "TEXT_IMAGE",
-        "textToImageParams": {
-            "text": prompt
-        },
-        "imageGenerationConfig": {
-            "numberOfImages": 1,
-            "height": 1024,
-            "width": 1024,
-            "cfgScale": 8.0,
-            "seed": 0
-        }
-    })
-
-accept = "application/json"
-content_type = "application/json"
-
-# Invoke the Amazon Bedrock model
-response = bedrock_client.invoke_model(
-    modelId=model_id,
-    body=body,
-    accept=accept, 
-    contentType=content_type
-)
-
-# Process the response
-result = json.loads(response["body"].read())
-
-base64_image = result.get("images")[0]
-base64_bytes = base64_image.encode('ascii')
-image_bytes = base64.b64decode(base64_bytes)
-
-image = Image.open(io.BytesIO(image_bytes))
-image.show()
-```
-
-## Run File 
-
-```bash
-python [NAME_OF_FILE].py
-```
-
-## OUTPUT
-https://github.com/HarshSakhwala-Crest/Blog-2/blob/133c1026245b048fc4a57358c717cf8d3e1cdda9/Blog%202.ipynb
-
-
-# Evaluating and Testing Images using Console
-
-## Steps
-On the API Gateway console, choose APIs in the navigation pane.
-
-On the APIs list, choose BedrockImageGenEval.
-
-In the Resources section, select the POST method below /generate-image.
-
-Choose the Test tab in the method execution settings.
-
-In the Request body section, enter the following JSON structure:
-{ “prompt”:”your prompt” }
-
-Choose Test.
-
-![alt text](image_2025_03_05T07_07_20_658Z.png)
-
-![alt text](image_2025_03_05T07_07_20_668Z.png)
-
-## OUTPUT
-![alt text](image_2025_03_05T07_07_20_670Z.png)
-
-
-# Blog-2 - Additional 1 - Generating Images using Amazon Nova Canvas
 
 ## Code
 
@@ -229,9 +157,17 @@ image.save(f"D:\Data-AI Blogs\Blog-2\generated-images\{unique_id}.png")
 print(f"Generated Image is Stored Successfully at : D:\Data-AI\Blogs\Blog-2\generated-images\{unique_id}.png")
 ```
 
+## Run File 
+
+```bash
+python [NAME_OF_FILE].py
+```
+
 ## OUTPUT
 
 Generated Image is Stored Successfully at : D:\Data-AI Blogs\Blog-2\generated-images\e4e392df-27a1-4fe2-a714-8ba9a68566b4.png
+
+![610ef92b-b419-4a58-a3da-f5d62cff8265](https://github.com/user-attachments/assets/da7d2bb7-475c-46d8-8550-e56a7b49e696)
 
 
 # Blog-2 - Additional 2 - Storing the Generated Images in Amazon S3 Bucket
@@ -314,6 +250,10 @@ print(f"Generated Image is Stored Successfully at S3 location : {object_url}")
 ## OUTPUT
 
 Generated Image is Stored Successfully at S3 location : https://blog-2-bucket-for-image-storage.s3.us-east-1.amazonaws.com/generated-images/aca33f19-c5e3-464a-8e95-08093960887b.png
+
+![image](https://github.com/user-attachments/assets/59b23328-94f1-42b5-838f-0aae78566441)
+
+![image](https://github.com/user-attachments/assets/596aaf64-b936-4c93-b253-ad7a32f1de47)
 
 
 # Blog-2 - Additional 3 - Modifying Generated Images using Amazon Titan Image Generator
@@ -425,4 +365,9 @@ print(f"Modified image saved at: {modified_image_path}")
 ## Output
 
 Generated image saved at: generated-and-modified-images/6ba0e04c-def5-4efb-a710-83b35d2231f2/generated_image.png
+
+![generated_image](https://github.com/user-attachments/assets/ceddb0bd-6393-4b27-a8da-03ea185de36f)
+
 Modified image saved at: generated-and-modified-images/6ba0e04c-def5-4efb-a710-83b35d2231f2/modified_image.png
+
+![modified_image](https://github.com/user-attachments/assets/697d98d9-b297-48b8-95ed-c16f4734fb96)
